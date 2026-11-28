@@ -2,7 +2,7 @@
 // 引けるのは守備の道具 4 種(グラブ・スパイク・リストバンド・アームスリーブ)× レア度 N/R/SR/SSR。付けると守備のキャリアの動きが少し良くなる(上限あり)。
 //   効き方: 能力(肩・守備)に「その場だけ足す点」。付けた道具の点を足した能力で career.js の EFFECT を引く(99 まで)。能力そのものは増えない。
 //     グラブ = 届く幅・飛び込み(守備) / スパイク = 一歩目・走る速さ(守備) / リストバンド = 送球の速さ(肩) / アームスリーブ = 送球の正確さ(肩)
-//     点: N 1〜3・R 2〜5・SR 4〜8・SSR 6〜12(Lv1〜Lv5)。同じ物が出ると Lv が 1 上がる(Lv5 の後は天井の点に)。
+//     点: N 1〜3・R 3〜6・SR 5〜10・SSR 8〜18(Lv1〜Lv5。11/28 夜(2) に強めた。前は R 2〜5・SR 4〜8・SSR 6〜12)。同じ物が出ると Lv が 1 上がる(Lv5 の後は天井の点に)。
 //   確率: N 52%・R 33%・SR 12%・SSR 3%(同じレア度の中は同じ割合)。10 回は 10 回目が SR 以上(SR 80%・SSR 20%)。
 //   天井: 1 回引くごとに 1 点。100 点で SSR を 1 つ選べる(点は引いた回数で、SSR が出ても減らない。選んだ時に 100 減る)。
 //   全部そろえると何かもらえる形(コンプガチャ)は作らない。確率は引く前の画面に全部出す(ガチャの画面の「出る物と確率」)。
@@ -11,6 +11,9 @@
 // 保存は localStorage の r4walk.gear.v1(端末の中。サーバーに送るのはランキングの「一番いい道具」の 1 語と、オンラインの見た目の 1 語だけ)。
 // 画面: ガチャ(#gcScreen)・道具を付け替える(同じ画面の下)。案内はショップの棚(アプリ)と守備のキャリアの結果の画面の 1 行だけ。
 // ?nogear=1 で道具の効き目を 0(画面は出る。比べる試験用)。
+// 11/28 夜(2) 持ち主「年齢区分を上げて、お金でも引けるように」「SSR 一式で確かに違うと分かる程度に、上手い無課金も上位に入れる釣り合いは残す」:
+//   点を強めた(下の RAR。前は N 1〜3・R 2〜5・SR 4〜8・SSR 6〜12)。釣り合いの表は tools/gear_balance_1128b.py と docs の 11/28 夜(2) の節。
+//   シーズンパスの間は 毎日 1 回 無料で引ける(その日のうちだけ。持ち越さない = 券をためない。S.pday に引いた日)。
 const KEY = 'r4walk.gear.v1';
 export const SLOTS = {
   glove: { name: 'グラブ', ab: 'field', eff: 'reach', what: 'グラブの届く幅・飛び込み' },
@@ -21,9 +24,9 @@ export const SLOTS = {
 export const SLOT_KEYS = Object.keys(SLOTS);
 export const RAR = {
   N: { p: 0.52, base: 1, max: 3, dupPt: 1, col: '#9aa7b8' },
-  R: { p: 0.33, base: 2, max: 5, dupPt: 2, col: '#3f8cff' },
-  SR: { p: 0.12, base: 4, max: 8, dupPt: 5, col: '#b45cff' },
-  SSR: { p: 0.03, base: 6, max: 12, dupPt: 20, col: '#ffc21a' },
+  R: { p: 0.33, base: 3, max: 6, dupPt: 2, col: '#3f8cff' },      // 11/28 夜(2) 前は 2〜5
+  SR: { p: 0.12, base: 5, max: 10, dupPt: 5, col: '#b45cff' },    // 前は 4〜8
+  SSR: { p: 0.03, base: 8, max: 18, dupPt: 20, col: '#ffc21a' },  // 前は 6〜12(SSR 一式 Lv5 で能力 65 → 83 の動き)
 };
 export const RAR_KEYS = ['SSR', 'SR', 'R', 'N'];
 export const LV_MAX = 5, PITY = 100;
@@ -102,11 +105,16 @@ function gain(S, x) {
 export function pull(n, src) {
   const S = load(), out = [];
   if (src === 'free') { if (S.free < n) return null; S.free -= n; }
+  if (src === 'pass') { if (!passDayOk(S)) return null; S.pday = today(); n = 1; }
   for (let i = 0; i < n; i++) { const x = draw1(n >= 10 && i === n - 1); out.push(gain(S, x)); S.pt += 1; S.pulls++; }
   S.hist = out.map((r) => ({ id: r.id, t: Date.now() })).concat(S.hist).slice(0, 30);
   save(S);
   return out;
 }
+// シーズンパスの「毎日 1 回」(アプリでパスの間だけ。その日に引かなければ消える)
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+const passOn = () => { try { const B = window.__bpStore; return !!(B && B.gacha && B.passActive && B.passActive()); } catch (e) { return false; } };
+export function passDayOk(S0) { const S = S0 || load(); return passOn() && S.pday !== today(); }
 // 天井: SSR を 1 つ選ぶ
 export function exchange(id) {
   const S = load(), x = BY_ID[id]; if (!x || x.rar !== 'SSR' || S.pt < PITY) return null;
@@ -175,15 +183,17 @@ function render() {
     <div class="gcHero"><div class="gcHeroArt"></div><div class="gcHeroTx"><b>守備の道具</b><small>グラブ・スパイク・リストバンド・アームスリーブ</small><small>付けると 守備のキャリアの動きが少し良くなります</small></div></div>
     <div class="gcRates"><span class="rSSR">SSR 3%</span><span class="rSR">SR 12%</span><span class="rR">R 33%</span><span class="rN">N 52%</span><button class="gcLink" data-act="rates">出る物と確率 ›</button></div>
     <div class="gcPulls">
+      ${passDayOk(S) ? `<button class="gcPull free" data-pull="pass1"${busy ? ' disabled' : ''}>シーズンパス 今日の 1 回<small>無料 ・ 今日のうちに</small></button>` : ''}
       ${S.free > 0 ? `<button class="gcPull free" data-pull="free1"${busy ? ' disabled' : ''}>無料の券で 1 回<small>持っている券 ${S.free} 枚</small></button>` : ''}
       ${st ? `<button class="gcPull" data-pull="paid1"${busy || !p1 ? ' disabled' : ''}>1 回引く${lab(p1)}</button>
       <button class="gcPull ten" data-pull="paid10"${busy || !p10 ? ' disabled' : ''}>10 回引く${lab(p10)}<em>10 回目は SR 以上</em></button>` : ''}
       ${!st && S.free <= 0 ? '<p class="gcNote">無料の券は 守備のキャリアの 初めての試合・昇格・キャリア完了 で もらえます。</p>' : ''}
     </div>
+    ${st && !passOn() && st.openShop ? '<button class="gcLink gcPassL" data-act="pass">シーズンパスの間は 毎日 1 回 無料で引けます ›</button>' : ''}
     <div class="gcPity"><div class="gcBar"><i style="width:${Math.min(100, S.pt)}%"></i></div><span>天井 ${Math.min(S.pt, PITY)} / ${PITY}</span>${S.pt >= PITY ? '<button class="gcPull sm" data-act="pity">SSR を選ぶ</button>' : `<small>あと ${PITY - S.pt} 回で SSR を 1 つ選べます</small>`}</div>
     <h2 class="gcH">付けている道具 <small>集めた ${owned} / ${ITEMS.length}</small></h2>
     ${slotsHtml(S)}
-    <p class="gcNote">同じ道具が出ると Lv が上がります(Lv${LV_MAX} まで。その後は天井の点に)。道具の点は 能力に足して効き、上限は 1 つあたり +12 です。打球の読みと捕り方が一番効きます。</p>
+    <p class="gcNote">同じ道具が出ると Lv が上がります(Lv${LV_MAX} まで。その後は天井の点に)。道具の点は 能力に足して効き、上限は 1 つあたり +${RAR.SSR.max} です。打球の読みと捕り方が一番効きます。</p>
     <p class="gcNote">${st ? '買った回数は その場で引きます(引く権利を持ち越しません)。' : ''}全部そろえても特別な物はもらえません。</p>
     <div class="gcRes hide"></div>
   </div>`;
@@ -222,7 +232,7 @@ function showResults(res, head) {
 }
 async function doPull(kind) {
   if (busy) return;
-  if (kind === 'free1') { const r = pull(1, 'free'); if (r) { render(); showResults(r); } return; }
+  if (kind === 'free1' || kind === 'pass1') { const r = pull(1, kind === 'pass1' ? 'pass' : 'free'); render(); if (r) showResults(r); return; }
   const st = store(); if (!st) return;
   busy = true; render();
   let ok = false, msg = '';
@@ -238,6 +248,7 @@ function onClick(e) {
   if (a === 'main') { view = 'main'; return render(); }
   if (a === 'rates') { view = 'rates'; return render(); }
   if (a === 'pity') { view = 'pity'; return render(); }
+  if (a === 'pass') { const st = store(); close(); if (st && st.openShop) st.openShop('pass'); return; }
   if (a === 'skip') { const box = el.querySelector('.gcRes'); if (box) box.classList.add('skip'); return; }
   if (a === 'resok') { const box = el.querySelector('.gcRes'); if (box) box.className = 'gcRes hide'; return; }
   if (b.dataset.pull) return doPull(b.dataset.pull);
@@ -246,4 +257,4 @@ function onClick(e) {
   if (b.dataset.pity) { const r = exchange(b.dataset.pity); view = 'main'; render(); if (r) showResults([r], '天井で選びました'); }
 }
 window.addEventListener('keydown', (e) => { if (isOpen() && e.key === 'Escape') { e.stopPropagation(); close(); } }, true);
-try { window.__bpGear = { open, close, isOpen, load, save, pull, exchange, equip, grant, owe, settleOwed, bonus, bestTag, parseTag, rateTable, ITEMS, BY_ID, SLOTS, RAR, iconHtml, bonusOf, PITY }; } catch (e) { /* */ }
+try { window.__bpGear = { open, close, isOpen, load, save, pull, exchange, equip, grant, owe, settleOwed, bonus, bestTag, parseTag, passDayOk, rateTable, ITEMS, BY_ID, SLOTS, RAR, iconHtml, bonusOf, PITY }; } catch (e) { /* */ }

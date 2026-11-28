@@ -14,7 +14,7 @@
 // ?noonline=1 で入れない。試験は window.__online。
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import * as Gear from './gear.js?v=1128g';   // 11/28 夜 道具ガチャ: 付けているグラブ(c の 6 つ目)の色とレア度の光
+import * as Gear from './gear.js?v=1128q';   // 11/28 夜 道具ガチャ: 付けているグラブ(c の 6 つ目)の色とレア度の光
 
 const API_KEY = 'AIzaSyC4yXnCeOvQZarFHz-0KKk5_szykky3yJk';   // 公開してよい識別子(js/ranking.js と同じ)
 const DB = 'https://oekakirace-default-rtdb.asia-southeast1.firebasedatabase.app';

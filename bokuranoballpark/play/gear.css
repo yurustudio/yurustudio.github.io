@@ -98,3 +98,4 @@
 .cRkGear{display:inline-flex;align-items:center;gap:2px;margin-left:4px;vertical-align:middle}
 .cRkGear b{font:900 10px/1 sans-serif;padding:2px 3px;border-radius:4px;background:#9aa7b8;color:#061a46}
 .cRkGear b.rR{background:#3f8cff;color:#fff}.cRkGear b.rSR{background:#b45cff;color:#fff}.cRkGear b.rSSR{background:linear-gradient(90deg,#ffe58a,#ffc21a)}
+.gcPassL{display:block;margin:6px auto 0;text-align:center}   /* 11/28 夜(2) シーズンパスの 1 行 */

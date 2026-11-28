@@ -3,9 +3,9 @@
 // 守備の試合(defense.js)はそのまま使い、外から包む(begin・startPlay・onCatch・tagBase・tagRunner・evalPlay・makeBall・varietyBall・reachClass)。
 // defense.js に足したのは送球の 1 行(throwMod)だけ。画面は js/career_ui.js、見た目は career.css。
 // 進み具合は localStorage の r4walk.career.v1。
-import { CareerUI } from './career_ui.js?v=1128p';
+import { CareerUI } from './career_ui.js?v=1128q';
 import * as Rank from './ranking.js?v=1128g';
-import * as Gear from './gear.js?v=1128g';   // 11/28 夜 道具ガチャ(付けた道具の点を能力に足して効かせる。上限あり)
+import * as Gear from './gear.js?v=1128q';   // 11/28 夜 道具ガチャ(付けた道具の点を能力に足して効かせる。上限あり)
 import { STADIUMS } from './stadiums.js';
 
 // 11/28 夜 持ち主「球場を買った場合、キャリアモードはランダムに球場が出るように」「高校生は甲子園固定」「買わない場合は甲子園固定」:

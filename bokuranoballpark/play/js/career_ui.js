@@ -2,7 +2,7 @@
 // 見た目は ChatGPT の案(_chatgpt_career_1125/career_result_gpt_1125.png): 夜の球場と花火、紺と金の枠、緑のバー、赤い昇格の帯、緑の大きなボタン。
 // 文字は全部 HTML(絵に焼かない)。飾りの花火だけ案の絵から切り出した(img/career_fw_l.webp・career_fw_r.webp)。
 import { STADIUM_NAMES } from './stadiums.js';
-import * as Gear from './gear.js?v=1128g';   // 11/28 夜 道具ガチャ(キャリアの画面の「道具」・結果の画面の 1 行・ランキングの行の道具)
+import * as Gear from './gear.js?v=1128q';   // 11/28 夜 道具ガチャ(キャリアの画面の「道具」・結果の画面の 1 行・ランキングの行の道具)
 const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const $ = (id) => document.getElementById(id);
 const ICON = {
